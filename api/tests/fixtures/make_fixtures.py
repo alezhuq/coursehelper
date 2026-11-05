@@ -4,12 +4,12 @@ Produces two PDFs under `api/tests/fixtures/`:
 
 - `digital_sample.pdf`: a born-digital, multi-page PDF with a section
   heading structure and a simple table, used to prove correct page-number
-  provenance, section_path extraction, and table-aware chunking (ING-01,
-  ING-02) with NO OCR involved (real extractable text layer).
+  provenance, section_path extraction, and table-aware chunking with NO
+  OCR involved (real extractable text layer).
 - `scanned_sample.pdf`: a single page containing ONLY a rasterized image
   (no text layer at all) with known words baked into the image via PIL, used
   to prove Docling's automatic per-region OCR triggers (do_ocr=True) with no
-  manual intervention (ING-01 edge: OCR-trigger).
+  manual intervention.
 
 Run directly: `python tests/fixtures/make_fixtures.py` (from `api/`). Uses
 reportlab + pillow (dev-only fixture-generation dependencies, see

@@ -1,8 +1,8 @@
 """Role-request routes: submit, admin list, admin approve/deny.
 
-The admin list and approve/deny are gated by `require_role("admin")` (Plan
-04, T-01-16); all three mutating routes additionally require the custom
-CSRF header (`app/auth/csrf.py`, T-01-18). A student calling approve/deny on
+The admin list and approve/deny are gated by `require_role("admin")`;
+all three mutating routes additionally require the custom
+CSRF header (`app/auth/csrf.py`). A student calling approve/deny on
 their own request id still gets 403 - authorization here never inspects
 request ownership, only the caller's role.
 """

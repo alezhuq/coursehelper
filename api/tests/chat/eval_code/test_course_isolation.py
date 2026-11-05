@@ -1,4 +1,4 @@
-"""D6 (course isolation, AUTH-05): a question whose only answer lives in
+"""Course isolation: a question whose only answer lives in
 another course refuses (never leaks that course's chunk/citation) when
 asked inside a course with no relevant material, and a student who isn't
 enrolled in the target course is denied outright.

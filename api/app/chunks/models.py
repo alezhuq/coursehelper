@@ -1,4 +1,4 @@
-"""Chunk ORM model (ING-01..ING-04).
+"""Chunk ORM model.
 
 A `Chunk` is one structure-aware slice of a parsed book: raw text, the
 physical page range and section-heading path it came from, its bge-m3
@@ -8,11 +8,11 @@ set from Python; Postgres recomputes it on every insert/update via the
 `to_tsvector('english', text)` expression declared in the `0007_chunks`
 migration. The `embedding` column backs an HNSW cosine-similarity index and
 `content_tsv` backs a GIN index, so a single row is retrievable by either a
-vector similarity query or a full-text `tsquery` (ING-03's dual index).
+vector similarity query or a full-text `tsquery`.
 
 `app/chunks/repo.py::replace_chunks_for_book` is the only writer of this
 table; it deletes and re-inserts a book's full chunk set inside one
-transaction so a retried ingestion job never duplicates rows (ING-04).
+transaction so a retried ingestion job never duplicates rows.
 """
 
 import uuid

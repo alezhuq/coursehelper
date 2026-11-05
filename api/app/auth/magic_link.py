@@ -21,7 +21,7 @@ from app.users.models import MagicLinkRequest
 
 MAGIC_LINK_MAX_AGE = 15 * 60  # 15 minutes
 
-# Login-CSRF guard (WR-07): the route sets this cookie when a link is
+# Login-CSRF guard: the route sets this cookie when a link is
 # requested and embeds the same random value in the token payload, binding
 # flow initiation to completion. Verification rejects a token whose state
 # does not match the requesting browser's cookie, so an attacker cannot

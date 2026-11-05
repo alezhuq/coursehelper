@@ -1,4 +1,4 @@
-"""HybridChunker singleton and the chunk_document entrypoint (ING-02).
+"""HybridChunker singleton and the chunk_document entrypoint.
 
 Mirrors `app/db/base.py`'s lazy-singleton pattern (see `app/ingestion/
 parsing.py`): building a `HybridChunker` loads the bge-m3 HuggingFace

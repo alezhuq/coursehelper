@@ -32,7 +32,7 @@ interface CitationPanelProps {
  * zoom, no prev/next/zoom controls, deliberately simpler than the full
  * viewer. A student who wants to navigate further uses "Open full viewer".
  *
- * No redirect-on-403 here (unlike ViewerPage's SC4 convention): a citation
+ * No redirect-on-403 here (unlike ViewerPage's 403 convention): a citation
  * only ever references the current course's own retrieved chunks
  * (course-boundary isolation enforced server-side), so a
  * 403 should not be reachable in practice - showing the generic error

@@ -1,4 +1,4 @@
-"""D4 (the empty-retrieval gate, CHAT-03): zero fused chunks yields exactly
+"""The empty-retrieval gate: zero fused chunks yields exactly
 the refusal string with NO generation call ever made - `is_empty_retrieval`
 is the code-level guarantee (not a prompted behavior) that the model can
 never invent an answer when nothing relevant was retrieved.

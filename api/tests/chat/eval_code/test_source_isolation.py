@@ -1,4 +1,4 @@
-"""D8 (prompt-injection source isolation, code-level): retrieved chunk text
+"""Prompt-injection source isolation (code-level): retrieved chunk text
 reaches the model wrapped in delimited `<source>` blocks inside the USER
 role only - never concatenated into the system prompt. A planted
 "ignore your rules" canary string inside a seeded chunk's text must appear

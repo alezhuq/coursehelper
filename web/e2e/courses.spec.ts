@@ -1,6 +1,6 @@
 import { expect, request, test } from "@playwright/test";
 
-// CRS-01/CRS-02 end-to-end: a professor creates a course through the form
+// Courses end-to-end: a professor creates a course through the form
 // and lands on its detail route, then a student browses the course list
 // and joins the new course with a single click.
 //

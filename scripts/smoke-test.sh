@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# OPS-01 smoke check: bring the full Docker Compose stack up healthy and
+# Smoke check: bring the full Docker Compose stack up healthy and
 # confirm the browser-facing path (nginx -> api -> db) actually works, not
 # just that containers started.
 set -euo pipefail

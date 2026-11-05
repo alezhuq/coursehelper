@@ -6,7 +6,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { ViewerPage } from "./ViewerPage";
 
 /**
- * VIEW-01/SRCH-02 tracer: react-pdf's `Document`/`Page` are mocked so this
+ * react-pdf's `Document`/`Page` are mocked so this
  * test drives the ?page=N clamp/error/403 logic without a real PDF
  * download or pdf.js worker - matches SearchPage.test.tsx's
  * vi.mock(react-router-dom's useNavigate) convention, plus a hoisted
@@ -64,7 +64,7 @@ function renderViewer(path: string) {
   );
 }
 
-describe("ViewerPage (VIEW-01/SRCH-02 tracer)", () => {
+describe("ViewerPage", () => {
   beforeEach(() => {
     mockNavigate.mockReset();
     mockDocState.numPages = 10;

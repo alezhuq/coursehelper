@@ -30,7 +30,7 @@ async def test_magic_link_round_trip_creates_session_and_user(async_client: Asyn
     link = await _requested_link(async_client, email)
     # The emailed link lands on the frontend verify page (never the API):
     # redemption requires the explicit POST below, so mail scanners that
-    # prefetch GET links cannot burn the single-use token (WR-06).
+    # prefetch GET links cannot burn the single-use token.
     assert "/auth/verify?token=" in link
     token = re.search(r"token=([^&]+)", link).group(1)
 
@@ -96,7 +96,7 @@ async def test_verify_from_browser_without_login_state_is_rejected_without_burni
     token = re.search(r"token=([^&]+)", link).group(1)
 
     # A different client (mail scanner, attacker-delivered link) has no
-    # login_state cookie and must be rejected (login-CSRF binding, WR-07).
+    # login_state cookie and must be rejected (login-CSRF binding).
     from app.main import app
 
     transport = ASGITransport(app=app)

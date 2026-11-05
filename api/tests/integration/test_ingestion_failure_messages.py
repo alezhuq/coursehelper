@@ -1,5 +1,5 @@
-"""Integration test: stage-tagged, human-readable failure messages (D-17,
-ING-04) and the parse-stage wall-clock timeout.
+"""Integration test: stage-tagged, human-readable failure messages and
+the parse-stage wall-clock timeout.
 
 The chunk and embed stages are monkeypatched inside `app.ingestion.pipeline`
 (chunk_document / embed_batch) to raise, and `ingest_book_stub` must record a

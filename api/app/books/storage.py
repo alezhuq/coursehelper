@@ -5,7 +5,7 @@ updating a running SHA-256 digest and byte total on every chunk, and
 enforces the size cap on that *running total* - never on the client's
 `Content-Length` header, which can be omitted (chunked transfer encoding)
 or lied about. The PDF signature check runs against only the
-first bytes of the stream (T-02-13: never trust the client's Content-Type
+first bytes of the stream (never trust the client's Content-Type
 or filename extension).
 
 `promote_temp_to_final` is the only place bytes move to their canonical
@@ -77,8 +77,8 @@ def promote_temp_to_final(temp_path: Path, final_path: Path) -> None:
     """Atomically move a validated temp file into its canonical path.
 
     `final_path` is always server-generated - `{book_storage_dir}/
-    {course_id}/{book_id}.pdf` - never built from the client filename
-    (T-02-14 path-traversal mitigation); the route constructs it.
+    {course_id}/{book_id}.pdf` - never built from the client filename;
+    the route constructs it.
     """
     final_path.parent.mkdir(parents=True, exist_ok=True)
     os.replace(temp_path, final_path)

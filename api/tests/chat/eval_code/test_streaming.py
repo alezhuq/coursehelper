@@ -1,4 +1,4 @@
-"""D9 (streaming event vocabulary, CHAT-02): the SSE response uses the
+"""Streaming event vocabulary: the SSE response uses the
 app's own event vocabulary (`token` / `citations` / `done`, `error` on
 failure) - never the upstream OpenAI-compatible wire shape (`data: {...}`
 frames with a `choices`/`delta` envelope) proxied verbatim to the browser.

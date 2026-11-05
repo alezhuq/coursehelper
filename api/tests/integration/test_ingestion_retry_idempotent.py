@@ -1,5 +1,4 @@
-"""Integration test: retrying an ingestion never duplicates chunks (ING-04,
-edge idempotency).
+"""Integration test: retrying an ingestion never duplicates chunks (edge idempotency).
 
 Runs the real pipeline once on `digital_sample.pdf` to `ready`, captures the
 chunk count and ids, then runs `ingest_book_stub` again on the same book
@@ -8,7 +7,7 @@ failure) and asserts the second run produces the identical chunk count and
 identical chunk ids, proving `replace_chunks_for_book`'s delete-then-insert
 plus the deterministic `chunk_id(book_id, chunk_index)` derivation together
 guarantee no duplication end-to-end through the real pipeline (not just at
-the repo-layer unit level already proven in 03-02).
+the repo-layer unit level).
 """
 
 from pathlib import Path

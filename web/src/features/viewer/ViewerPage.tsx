@@ -48,7 +48,7 @@ function clampPage(page: number, numPages: number | null): number {
  * (`require_course_enrollment`-gated) authorizes normally. A 403
  * response surfaces to react-pdf as a `ResponseException` with a `status`
  * field (not part of react-pdf's own `Error` type, hence the runtime
- * cast in `handleLoadError`) - that redirects to `/` immediately (SC4),
+ * cast in `handleLoadError`) - that redirects to `/` immediately,
  * matching every other course-scoped page's enrollment-denial convention.
  * No passage-level highlight is ever drawn on the page - page-level
  * precision only.

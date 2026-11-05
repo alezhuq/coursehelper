@@ -1,5 +1,5 @@
-"""Integration tests for the chunks table's dual index (ING-03) and the
-delete-then-insert idempotency of `replace_chunks_for_book` (ING-04),
+"""Integration tests for the chunks table's dual index and the
+delete-then-insert idempotency of `replace_chunks_for_book`,
 against a real Postgres/pgvector database.
 
 Uses synthetic 1024-dim vectors (not real bge-m3 embeddings) and synthetic
@@ -106,7 +106,7 @@ async def test_dual_index_and_idempotent_replace(postgres_container: PostgresCon
         await replace_chunks_for_book(session, book_id, chunks, embeddings)
         await session.commit()
 
-        # (1) HNSW cosine query returns the nearest chunk (ING-03 vector index).
+        # (1) HNSW cosine query returns the nearest chunk.
         query_vec = _unit_vector(1024, 0)
         nearest = await session.execute(
             select(Chunk)
@@ -118,8 +118,8 @@ async def test_dual_index_and_idempotent_replace(postgres_container: PostgresCon
         assert nearest_chunk.chunk_index == 0
 
         # (2) Full-text tsquery returns the matching chunk, proving
-        # content_tsv is generated from the raw text (ING-03 tsvector
-        # index, edge ING-03/encoding).
+        # content_tsv is generated from the raw text (tsvector
+        # index).
         fts = await session.execute(
             select(Chunk).where(
                 Chunk.book_id == book_id,
@@ -131,7 +131,7 @@ async def test_dual_index_and_idempotent_replace(postgres_container: PostgresCon
         assert "photosynthesis" in fts_chunk.text
 
         # (3) A second replace with FEWER chunks leaves no duplicates and
-        # no stale rows (ING-04 idempotency); the surviving row's id
+        # no stale rows; the surviving row's id
         # equals chunk_id(book_id, 0).
         fewer_chunks = [chunks[0]]
         fewer_embeddings = [embeddings[0]]

@@ -6,7 +6,7 @@ professor / deny leaves the role unchanged" live in exactly one place.
 Authorization (who may call approve/deny/list) is enforced entirely by the
 route-level `require_role("admin")` dependency - this module never
 re-derives or duplicates that check, and never looks at request ownership
-(T-01-19: approve/deny admits any admin, regardless of whose request it is).
+(approve/deny admits any admin, regardless of whose request it is).
 """
 
 import uuid

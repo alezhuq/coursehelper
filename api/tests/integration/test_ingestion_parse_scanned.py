@@ -1,5 +1,4 @@
-"""Integration test: scanned (image-only) PDF triggers automatic OCR (ING-01
-OCR-trigger edge).
+"""Integration test: scanned (image-only) PDF triggers automatic OCR.
 
 `scanned_sample.pdf` has NO extractable text layer at all (see
 `make_fixtures.py`: the entire page is a single embedded raster image, no

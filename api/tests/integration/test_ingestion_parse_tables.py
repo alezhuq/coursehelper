@@ -1,5 +1,4 @@
-"""Integration test: table-aware, non-garbled, non-split chunking (ING-01
-table edge).
+"""Integration test: table-aware, non-garbled, non-split chunking.
 
 `digital_sample.pdf`'s Methods page (2) includes a simple data table
 (Trial / Light Intensity / Oxygen Output). Docling's `do_table_structure`

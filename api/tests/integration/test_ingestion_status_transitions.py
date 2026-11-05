@@ -84,7 +84,7 @@ async def test_pipeline_reaches_ready_with_dual_indexed_chunks(
         chunks = chunks_result.scalars().all()
         assert len(chunks) > 0
 
-        # (1) HNSW cosine query returns a chunk for this book (ING-03).
+        # (1) HNSW cosine query returns a chunk for this book.
         query_vec = embed_batch(["photosynthesis converts light into chemical energy"])[0]
         nearest = await session.execute(
             select(Chunk)
@@ -94,7 +94,7 @@ async def test_pipeline_reaches_ready_with_dual_indexed_chunks(
         )
         assert nearest.scalar_one() is not None
 
-        # (2) Full-text tsquery returns a chunk for this book (ING-03).
+        # (2) Full-text tsquery returns a chunk for this book.
         fts = await session.execute(
             select(Chunk).where(
                 Chunk.book_id == book_id,

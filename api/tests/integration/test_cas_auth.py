@@ -48,7 +48,7 @@ async def test_valid_ticket_creates_student_and_issues_session(
     assert "session" in response.cookies
 
     # The ticket became trusted only via a server-side serviceValidate call
-    # to (the fake) CAS - threat T-01-10.
+    # to (the fake) CAS.
     assert len(fake_cas_server.requests) == 1
     validate_request = fake_cas_server.requests[0]
     assert validate_request.url.path.endswith("/serviceValidate")

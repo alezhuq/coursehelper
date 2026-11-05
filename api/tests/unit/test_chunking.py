@@ -1,4 +1,4 @@
-"""Unit tests for `app.ingestion.chunking.chunk_document` (ING-02).
+"""Unit tests for `app.ingestion.chunking.chunk_document`.
 
 Exercises the real Docling parse -> HybridChunker pipeline against the
 `digital_sample.pdf` fixture (born-digital, no OCR needed) to prove token

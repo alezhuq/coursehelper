@@ -1,5 +1,5 @@
-"""Cross-cutting enrollment deny matrix (VIEW-02 + SRCH-01 authz, roadmap
-SC4): a single suite proving non-enrolled users are blocked from both
+"""Cross-cutting enrollment deny matrix: a single
+suite proving non-enrolled users are blocked from both
 search and PDF bytes, cross-course book access always 404s (never bytes),
 and enrollment revocation takes effect on the very next request.
 

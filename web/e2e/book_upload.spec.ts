@@ -1,6 +1,6 @@
 import { expect, request, test } from "@playwright/test";
 
-// CRS-03/CRS-04/CRS-05 end-to-end: a professor uploads a PDF to their own
+// Book upload end-to-end: a professor uploads a PDF to their own
 // course, watches its status poll queued -> ready (the stub worker
 // finishes quickly), then deletes it and confirms the row disappears.
 //

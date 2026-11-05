@@ -1,5 +1,5 @@
-"""Unit tests for deterministic chunk IDs (ING-02) and the no-commit
-delete-then-insert contract of `replace_chunks_for_book` (ING-04).
+"""Unit tests for deterministic chunk IDs and the no-commit
+delete-then-insert contract of `replace_chunks_for_book`.
 
 No database is needed for these: `chunk_id` is a pure function, and the
 no-commit assertion reads `replace_chunks_for_book`'s own source rather

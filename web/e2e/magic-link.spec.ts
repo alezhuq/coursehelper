@@ -51,7 +51,7 @@ test.describe("magic-link sign-in through real nginx + Mailpit", () => {
     // serve, so it must come from the inbox, not app memory.
     const link = await readMagicLinkFromMailpit(request, email);
 
-    // Locks WR-06's shape: the emailed link must land on the SPA verify
+    // Locks the prefetch-safe shape: the emailed link must land on the SPA verify
     // page, never a directly GET-redeemable API URL - a mail scanner's
     // prefetch (O365/Outlook) would otherwise burn the single-use token
     // before the user ever clicked. Do NOT "fix" this back to an
@@ -71,7 +71,7 @@ test.describe("magic-link sign-in through real nginx + Mailpit", () => {
 
     // A real session, not just a redirect: assert the `session` cookie
     // nginx forwarded from the api's Set-Cookie is actually present on the
-    // context (WR-06/WR-07 both culminate in this cookie being issued).
+    // context (prefetch safety and login-CSRF binding both culminate in this cookie being issued).
     const cookies = await page.context().cookies();
     const sessionCookie = cookies.find((cookie) => cookie.name === "session");
     expect(sessionCookie).toBeDefined();

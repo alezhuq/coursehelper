@@ -1,4 +1,4 @@
-"""Create chunks table (ING-01..ING-04).
+"""Create chunks table.
 
 Backs the parsed/chunked/embedded content of a book: raw chunk text, the
 physical page range and section-heading path it came from, its bge-m3
@@ -9,7 +9,7 @@ is the dual-index write target of the ingestion pipeline (Stage 4) -
 search and a keyword full-text search over the same rows.
 `uq_chunks_book_chunk_index` plus deterministic uuid5 chunk IDs
 (`app/chunks/repo.py::chunk_id`) are the idempotency safety net so a
-retried ingestion job never duplicates chunks (ING-04). `book_id` cascades
+retried ingestion job never duplicates chunks. `book_id` cascades
 on delete so `app/books/repo.py::delete_book` automatically cleans up a
 book's chunks with no code change in that module.
 

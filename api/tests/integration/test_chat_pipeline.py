@@ -1,4 +1,4 @@
-"""Hermetic, stub-LLM end-to-end integration test for the chat pipeline - the tracer's proof.
+"""Hermetic, stub-LLM end-to-end integration test for the chat pipeline.
 
 Real Postgres (via `postgres_container`), real retrieval/persistence, real
 RRF fusion - only the LLM calls are stubbed (`app.chat.routes.

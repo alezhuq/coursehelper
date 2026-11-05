@@ -1,9 +1,9 @@
-"""CR-01 regression test: a retrieval-step exception (not just condensation)
+"""Regression test: a retrieval-step exception (not just condensation)
 surfaces as a graceful SSE `error` event, never an unhandled exception mid-stream.
 
-This covers the fix in commit 94f80c0 that broadened the exception handler in
+This covers the broadened exception handler in
 routes.py to catch failures during embed_batch, vector_arm, keyword_arm, and
-fuse_rrf (lines 134-152 in routes.py), not just LLMCondenseError from condensation.
+fuse_rrf not just LLMCondenseError from condensation.
 
 Reuses the same monkeypatch convention and seeding helpers as test_condensation.py.
 """
@@ -168,10 +168,9 @@ async def test_retrieval_step_exception_surfaces_as_sse_error_event(
     `error` event with a plain-language message - NOT an unhandled exception
     that breaks the stream or produces a 500.
 
-    This is the core regression for CR-01: the fix in commit 94f80c0 broadened
+    This is the core regression: the chat route broadened
     the exception handler from catching only LLMCondenseError to catching all
-    Exception types around the entire retrieval pipeline (lines 134-152 in
-    routes.py).
+    Exception types around the entire retrieval pipeline.
     """
     await _login(async_client, "retrieval-student", "student")
     conversation_id = await _get_conversation_id(async_client, seeded["course_id"])

@@ -1,6 +1,6 @@
 import { expect, request, test } from "@playwright/test";
 
-// CHAT-03 deterministic refusal-path E2E: a real (owner-enrolled) professor
+// Deterministic refusal-path E2E: a real (owner-enrolled) professor
 // opens the course chat for a freshly created course with zero ready
 // chunks - the hybrid retrieval arms both return empty for a course with no
 // chunks at all, so the empty-retrieval gate (app/chat/gate.py::

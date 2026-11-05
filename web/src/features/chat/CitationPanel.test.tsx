@@ -7,7 +7,7 @@ import { CitationPanel } from "./CitationPanel";
 import type { CitationSpan } from "./useChatStream";
 
 /**
- * CHAT-01: mirrors ViewerPage.test.tsx's react-pdf mocking convention (a
+ * Mirrors ViewerPage.test.tsx's react-pdf mocking convention (a
  * hoisted mutable mock-state object) so this test drives the panel's
  * loading/populated/error states without a real PDF download or pdf.js
  * worker. Unlike ViewerPage.test.tsx's mock, this one also honors the

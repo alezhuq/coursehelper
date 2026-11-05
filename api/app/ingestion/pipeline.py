@@ -1,4 +1,4 @@
-"""Ingestion pipeline orchestrator (ING-01..ING-04): parse -> chunk -> embed
+"""Ingestion pipeline orchestrator: parse -> chunk -> embed
 -> write+index, run in-process as four stages inside the one transaction
 `ingest_book_stub` already owns.
 
@@ -14,7 +14,7 @@ stage failure is re-raised as a `RuntimeError`
 tagged with the stage name (`[parse]`, `[chunk]`, `[embed]`, `[write]`).
 That tagged message flows unchanged into `ingest_book_stub`'s existing
 `except Exception as exc: book.status_error = str(exc)[:2000]` handler,
-giving ING-04's "human-readable, stage-tagged error".
+giving a human-readable, stage-tagged error.
 
 The parse stage does NOT run in a thread: a thread cannot be killed, but a
 child process can. `parse_book_in_subprocess` runs Docling in
@@ -35,7 +35,7 @@ matching the existing status-transition commit pattern. A zero-chunk
 document is not an error: Stage 3 skips the embed call entirely when there
 are no chunks (an empty batch has nothing to embed), and Stage 4 still runs
 (deleting any prior chunks, inserting none) so the book resolves to `ready`
-with zero chunks rather than raising (edge ING-02/empty, ING-03/empty).
+with zero chunks rather than raising.
 """
 
 import asyncio
@@ -167,7 +167,7 @@ async def run_pipeline(session: AsyncSession, book: Book) -> None:
         if chunks:
             embeddings = await asyncio.to_thread(embed_batch, [c["embed_text"] for c in chunks])
         else:
-            # No chunkable content (edge ING-02/empty): nothing to embed,
+            # No chunkable content: nothing to embed,
             # and calling embed_batch([]) would be a pointless model call.
             embeddings = []
     except Exception as exc:

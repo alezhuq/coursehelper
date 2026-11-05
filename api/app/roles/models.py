@@ -53,7 +53,7 @@ class RoleRequest(Base):
     )
 
     __table_args__ = (
-        # Guards T-01-16-adjacent data integrity: a user can never have two
+        # Guards data integrity: a user can never have two
         # requests awaiting a decision at once. Approved/denied requests are
         # excluded from the index, so a user may submit again after a denial.
         Index(

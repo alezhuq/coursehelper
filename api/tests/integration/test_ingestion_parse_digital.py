@@ -1,4 +1,4 @@
-"""Integration test: born-digital PDF parse + chunk (ING-01 page-number edge).
+"""Integration test: born-digital PDF parse + chunk.
 
 Exercises the real Docling pipeline against `digital_sample.pdf` (a
 born-digital, no-OCR-needed fixture spanning 3 physical pages) and proves

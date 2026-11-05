@@ -1,6 +1,6 @@
 import { expect, request, test } from "@playwright/test";
 
-// AUTH-04 end-to-end: a student requests the professor role, an admin
+// Role request end-to-end: a student requests the professor role, an admin
 // approves it, and the student's role becomes professor on re-fetch.
 //
 // Uses dedicated, uniquely-named test-auth users (not the shared

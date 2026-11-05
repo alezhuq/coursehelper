@@ -1,5 +1,5 @@
 """Chunk persistence: deterministic IDs + delete-then-insert replace
-(ING-02 stability, ING-04 idempotency).
+.
 
 `replace_chunks_for_book` never does a `SELECT`-then-diff or a
 per-row upsert - it deletes every existing chunk row for the book and
@@ -17,7 +17,7 @@ Chunk IDs are derived deterministically from `(book_id, chunk_index)` via
 `uuid5` under a fixed, checked-in namespace, so the same logical chunk
 always gets the same id across repeated ingestion runs of the same book -
 this is what makes "the same PDF re-ingested produces the same chunk IDs"
-true (ING-02), independent of whether the delete-then-insert idempotency
+true, independent of whether the delete-then-insert idempotency
 guard above ever triggers.
 """
 

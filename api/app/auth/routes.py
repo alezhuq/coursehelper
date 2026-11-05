@@ -60,7 +60,7 @@ async def cas_callback(
     The ticket query param is untrusted input; it is only believed after
     `validate_ticket` re-validates it against cas.sfu.ca.
 
-    Accepted residual risk (login CSRF, WR-07): unlike the magic-link flow,
+    Accepted residual risk (login CSRF): unlike the magic-link flow,
     this callback has no state binding to the browser that initiated login -
     CAS requires the `service` URL to match exactly on redirect and
     serviceValidate, leaving nowhere standard to carry per-browser state.
@@ -119,7 +119,7 @@ async def request_magic_link_route(
     response: Response,
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, str]:
-    # Login-CSRF binding (WR-07): a random state is embedded in the token
+    # Login-CSRF binding: a random state is embedded in the token
     # AND set as a cookie on the requesting browser; verification requires
     # both to match, so a link can only complete sign-in in the browser
     # that asked for it.
@@ -164,7 +164,7 @@ async def verify_magic_link_route(
     and receive a session cookie - before the user ever clicked.
 
     The login_state cookie must match the state embedded in the token
-    (login-CSRF binding, WR-07): a browser that never requested this link
+    (login-CSRF binding): a browser that never requested this link
     cannot be signed in by it. The missing-cookie case is rejected BEFORE
     the token is redeemed, so the rightful requester's link still works in
     the browser that asked for it.

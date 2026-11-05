@@ -1,10 +1,10 @@
-"""OPS-02: the LLM endpoint (base_url/model) is an env-configured,
+"""The LLM endpoint (base_url/model) is an env-configured,
 provider-swappable, non-request-influenced surface.
 
 Proves: (a) overriding `LLM_BASE_URL`/`LLM_MODEL` changes the outbound
 httpx request's host/path and payload `model` - a provider swap really is
 config-only; (b) no request/body field can redirect the outbound host (the
-T-05-03 SSRF mitigation - `base_url`/`model` are built from `get_settings()`
+SSRF mitigation - `base_url`/`model` are built from `get_settings()`
 alone); (c) an unset `LLM_CONDENSE_MODEL` falls back to `LLM_MODEL`.
 
 Exercises `app.chat.llm_client.condense_query` directly against a captured

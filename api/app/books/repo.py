@@ -77,7 +77,7 @@ async def get_book_in_course(
     session: AsyncSession, course_id: uuid.UUID, book_id: uuid.UUID
 ) -> Book:
     """Fetch a book scoped to `course_id`; 404 if it does not exist or its
-    `course_id` does not match the path (cross-course guard, T-02-15)."""
+    `course_id` does not match the path (cross-course guard)."""
     result = await session.execute(select(Book).where(Book.id == book_id))
     book = result.scalar_one_or_none()
     if book is None or book.course_id != course_id:

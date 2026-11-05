@@ -1,4 +1,4 @@
-# nginx-in-the-loop E2E overlay (AUTH-02 regression coverage). Apply ON TOP
+# nginx-in-the-loop E2E overlay. Apply ON TOP
 # of the base docker-compose.yml ONLY - never docker-compose.override.yml
 # (which replaces `web` with the Vite dev server and would defeat the entire
 # point of this file: reproducing the exact stack a real user hits, where
