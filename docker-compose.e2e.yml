@@ -1,0 +1,43 @@
+# nginx-in-the-loop E2E overlay (AUTH-02 regression coverage). Apply ON TOP
+# of the base docker-compose.yml ONLY - never docker-compose.override.yml
+# (which replaces `web` with the Vite dev server and would defeat the entire
+# point of this file: reproducing the exact stack a real user hits, where
+# nginx serves the built SPA and reverse-proxies /api/).
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.e2e.yml up -d --wait
+#   cd web && BASE_URL=http://localhost:8080 npx playwright test
+#
+# NEVER apply this file to a production deployment (which uses
+# docker-compose.yml alone) and NEVER combine it with
+# docker-compose.override.yml - both mutate the same `api`/`web` services
+# for different, incompatible purposes.
+services:
+  api:
+    environment:
+      # Fail-safe default in api/app/settings.py is ENVIRONMENT=production
+      # (Secure-only cookies); over plain http://localhost:8080 the browser
+      # would silently drop both `login_state` and `session`, so the E2E
+      # stack must opt in to development explicitly, exactly like
+      # docker-compose.override.yml does for the Vite dev stack.
+      ENVIRONMENT: development
+      # Route outbound magic-link email at the Mailpit service added below
+      # instead of a real SMTP relay.
+      SMTP_HOST: mail
+      SMTP_PORT: "1025"
+      # The emitted magic-link URL is built from this value
+      # (api/app/auth/magic_link.py: f"{app_base_url}/auth/verify?token=...").
+      # Pin it to the nginx-published port so the test can follow the exact
+      # emailed link through the real reverse proxy.
+      APP_BASE_URL: http://localhost:8080
+      # Registers POST /test-auth/login (main.py), which the rest of the
+      # Playwright suite's global-setup.ts relies on for its login-bypass
+      # storageState. Without this the non-magic-link specs would fail
+      # against this overlay.
+      ENABLE_TEST_AUTH: "true"
+
+  mail:
+    image: axllent/mailpit
+    ports:
+      - "8025:8025" # web UI + HTTP API (read the emitted link from here)
+      - "1025:1025" # SMTP (api sends to this)

@@ -1,0 +1,175 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  api:
+    build:
+      context: ./api
+    command: ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      SESSION_SECRET: ${SESSION_SECRET}
+      APP_BASE_URL: ${APP_BASE_URL}
+      ENVIRONMENT: ${ENVIRONMENT}
+      # SFU CAS base URL. Defaults to the expected production
+      # value; override in .env once SFU Computing Services confirms the
+      # exact base during CAS service registration (registration is external and
+      # non-blocking).
+      CAS_BASE_URL: ${CAS_BASE_URL:-https://cas.sfu.ca/cas}
+      # Admin bootstrap: set to the
+      # @sfu.ca email of the initial platform operator. Promotion to admin
+      # happens on that user's first sign-in only while zero admins exist
+      # (see app/users/repo.py::maybe_bootstrap_admin) - safe to leave set
+      # after initial setup, since the guard never re-grants once an admin
+      # exists. Unset by default (empty means "no bootstrap").
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOK_STORAGE_DIR: /data/books
+      # Chat - the ENTIRE LLM provider-swap
+      # surface. Overriding these three vars (config only, never a code
+      # change) points the pipeline at any OpenAI-compatible endpoint. The
+      # default host `llm` matches this file's own `llm` (Ollama) service
+      # below, reachable once it is started via `docker compose --profile
+      # llm up`. LLM_CONDENSE_MODEL empty -> falls back to LLM_MODEL.
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://llm:11434/v1}
+      LLM_MODEL: ${LLM_MODEL:-llama3.1:8b}
+      LLM_CONDENSE_MODEL: ${LLM_CONDENSE_MODEL:-}
+      # Token budget for the retrieved source blocks in the chat prompt
+      # (summed from Chunk.token_count; whole chunks only). Must stay in step
+      # with OLLAMA_CONTEXT_LENGTH on the llm service below: 8192 context =
+      # ~150 system + ~2,700 history + 3,500 sources + ~200 question + 800
+      # answer, with headroom. Raise both together, never one alone.
+      LLM_SOURCE_TOKEN_BUDGET: ${LLM_SOURCE_TOKEN_BUDGET:-3500}
+    volumes:
+      - bookdata:/data/books
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  worker:
+    build:
+      # Consolidated onto the api image: the ingestion task body needs SQLAlchemy + the Book
+      # model, which only the api package has, and the real ingestion
+      # (Docling + embeddings) needs them too.
+      context: ./api
+    # --concurrency 1: one CPU-only host must never run Docling parsing
+    # + bge-m3 embedding for two books at once, so the ingestion queue
+    # processes a single book at a time.
+    command: ["procrastinate", "--app", "app.ingestion.procrastinate_app.app", "worker", "--concurrency", "1"]
+    # An OOM-killed or crashed worker must come back on its own so queued
+    # books keep flowing and the stalled-ingestion recovery
+    # (app/ingestion/tasks.py) can run and fail the orphaned book.
+    restart: unless-stopped
+    depends_on:
+      # Depends on api (not just db) being healthy, not merely db: the
+      # procrastinate job-queue schema (tables/functions) is applied by the
+      # api's `alembic upgrade head` startup step (migration
+      # 0002_procrastinate_schema). Starting the worker as soon as db is
+      # healthy races that migration and the worker process crashes with
+      # "function procrastinate_prune_stalled_workers_v1 does not exist".
+      api:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      # The worker runs the api image and therefore instantiates the shared
+      # app.settings.Settings, whose session_secret is a required field. The
+      # worker never serves HTTP or issues cookies, but Settings validates all
+      # required fields eagerly, so ingest_book_stub's get_settings() call
+      # crashes without it and every ingestion job fails before the
+      # queued->processing->ready transition. Pass the same secret as the api.
+      SESSION_SECRET: ${SESSION_SECRET}
+      BOOK_STORAGE_DIR: /data/books
+      # Parse-stage wall-clock ceiling. run_pipeline runs the Docling
+      # parse in a child process and kills it when this elapses, so one
+      # pathological PDF becomes a readable [parse] timeout (and no runaway
+      # parse) instead of hanging the concurrency=1 worker for every other
+      # queued book. 3600s (60 min) was set from a
+      # load test: a real 769-page dense STEM textbook parsed in 32.5 min
+      # on CPU-only hardware, so 3600 is ~1.85x that and well clear of any
+      # target-range (300-500pg) book. Overridable per-deployment.
+      INGEST_PARSE_TIMEOUT_SECONDS: ${INGEST_PARSE_TIMEOUT_SECONDS:-3600}
+      # Thread-pool caps: torch, onnxruntime
+      # (RapidOCR's backend), and OpenBLAS each size an intra-op thread pool
+      # from the visible CPU count at library import time, and each thread
+      # carries its own inference buffers - this is why the vars are set here
+      # as process environment rather than in application code. The two
+      # resident singletons that pay this cost for the worker's whole process
+      # lifetime are the Docling DocumentConverter (app/ingestion/parsing.py)
+      # and the bge-m3 SentenceTransformer (app/ingestion/embedding.py). 2 of
+      # the Docker VM's 4 CPUs is the chosen ceiling: --concurrency 1
+      # means extra threads buy no queue throughput, only inflate the peak,
+      # while 2 leaves headroom for api/db/llm during an ingestion run.
+      OMP_NUM_THREADS: ${WORKER_NUM_THREADS:-2}
+      MKL_NUM_THREADS: ${WORKER_NUM_THREADS:-2}
+      OPENBLAS_NUM_THREADS: ${WORKER_NUM_THREADS:-2}
+      # The HuggingFace tokenizers Rust thread pool is pure overhead and
+      # warning noise at --concurrency 1.
+      TOKENIZERS_PARALLELISM: "false"
+    volumes:
+      - bookdata:/data/books
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "procrastinate",
+          "--app",
+          "app.ingestion.procrastinate_app.app",
+          "healthchecks",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    healthcheck:
+      # 127.0.0.1, not localhost: this environment's container DNS resolves
+      # "localhost" to ::1 first and nginx only binds the IPv4 wildcard,
+      # so "http://localhost/" spuriously fails with connection refused.
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  llm:
+    image: ollama/ollama:latest
+    profiles: ["llm"]
+    environment:
+      # Ollama's own default context is far smaller than the chat prompt
+      # (system + history + LLM_SOURCE_TOKEN_BUDGET of sources + answer), and
+      # the OpenAI-compatible /v1 endpoint cannot raise num_ctx per request,
+      # so the server default must be set here. Keep in step with
+      # LLM_SOURCE_TOKEN_BUDGET on the api service above.
+      OLLAMA_CONTEXT_LENGTH: ${OLLAMA_CONTEXT_LENGTH:-8192}
+    volumes:
+      - ollama_models:/root/.ollama
+
+volumes:
+  pgdata:
+  ollama_models:
+  bookdata:

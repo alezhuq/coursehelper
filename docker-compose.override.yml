@@ -1,0 +1,81 @@
+# Dev-only additions merged automatically by `docker compose up` alongside
+# docker-compose.yml. Kept intentionally conservative: everything here must
+# still leave `docker compose up -d --wait` + scripts/smoke-test.sh green,
+# since Compose auto-merges this file by default.
+services:
+  api:
+    volumes:
+      - ./api/app:/app/app
+    command: ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
+    environment:
+      SMTP_HOST: mail
+      SMTP_PORT: "1025"
+      # Explicit dev opt-in: the api defaults ENVIRONMENT to "production"
+      # (fail-safe Secure cookies), so local http:// development must say
+      # so here or the browser will drop the session cookie.
+      ENVIRONMENT: development
+      # Dev/E2E only - never set in docker-compose.yml (the prod-style base
+      # file), so a production deployment (which only ever applies that
+      # file) never registers /test-auth/login.
+      ENABLE_TEST_AUTH: "true"
+      # Docker Desktop for macOS: native filesystem events don't cross the
+      # VM boundary reliably over bind mounts, so uvicorn --reload's
+      # watchfiles backend can silently miss edits. Force polling.
+      WATCHFILES_FORCE_POLLING: "true"
+
+  worker:
+    # Consolidated onto the api image (docker-compose.yml); track the api
+    # package's code for hot-reload, not the removed worker/ package.
+    # procrastinate has no built-in reloader, so wrap it in watchfiles
+    # (already installed via fastapi[standard] -> uvicorn[standard], the
+    # same tool that powers api --reload). --filter python watches only
+    # .py files, avoiding a restart loop on __pycache__ bytecode writes.
+    volumes:
+      - ./api/app:/app/app
+    # --concurrency 1 mirrors the base docker-compose.yml worker command:
+    # the dev override replaces the whole command array, so the
+    # single-book-at-a-time CPU guard has to be repeated here or hot-reload
+    # dev silently runs the worker at default (unbounded) concurrency.
+    command: ["watchfiles", "--filter", "python", "procrastinate --app app.ingestion.procrastinate_app.app worker --concurrency 1", "app"]
+    environment:
+      WATCHFILES_FORCE_POLLING: "true"
+      # The api package is pip-installed into site-packages at image-build time
+      # (api/Dockerfile: `pip install .`). The `procrastinate` console-script
+      # runs with sys.path[0]=/usr/local/bin, so its `import app` resolves to the
+      # BAKED site-packages copy, not the mounted ./api/app source above - so
+      # watchfiles would restart the process but reload stale code. PYTHONPATH=/app
+      # puts the bind-mounted source ahead of site-packages so hot-reload (and any
+      # source edit) actually reaches the worker. Dev-only: the prod base file
+      # never sets this, so production correctly runs the baked package.
+      PYTHONPATH: /app
+
+  web:
+    build:
+      target: dev
+    command: ["sh", "-c", "npm install && npm run dev -- --host --port 80"]
+    environment:
+      VITE_API_PROXY_TARGET: http://api:8000
+      # Docker Desktop for macOS: native filesystem events don't cross the
+      # VM boundary reliably over bind mounts, so Vite's watcher and the
+      # HMR client port need explicit dev configuration (see
+      # web/vite.config.ts).
+      VITE_USE_POLLING: "true"
+      VITE_HMR_CLIENT_PORT: "8080"
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    healthcheck:
+      # The node:22-slim dev image doesn't ship wget (unlike the base
+      # nginx healthcheck), so use a Node one-liner instead so
+      # `docker compose up -d --wait` still blocks until Vite is serving.
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:80/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  mail:
+    image: axllent/mailpit
+    ports:
+      - "8025:8025" # web UI
+      - "1025:1025" # SMTP

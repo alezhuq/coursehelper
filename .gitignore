@@ -1,0 +1,47 @@
+# Environment / secrets - only the placeholder template is committed
+.env
+.env.*
+*.env
+!.env.example
+*.pem
+*.key
+
+# Local test materials (copyrighted course PDFs, not for the repo)
+testfiles/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+.coverage
+.coverage.*
+htmlcov/
+
+# Node / frontend
+node_modules/
+web/dist/
+web/.vite/
+web/*.tsbuildinfo
+coverage/
+
+# Playwright / e2e
+web/e2e/.auth/
+playwright-report/
+test-results/
+blob-report/
+
+# Logs / runtime
+*.log
+*.pid
+
+# OS
+.DS_Store
+
+# Editors
+.idea/
+.vscode/
